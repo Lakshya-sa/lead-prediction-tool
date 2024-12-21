@@ -1,0 +1,752 @@
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Prediction Tool</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #4CAF50, #6c63ff);
+            color: white;
+        }
+        header {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 36px;
+            color: #ffffff;
+        }
+        header p {
+            margin: 10px 0 0;
+            font-size: 18px;
+            color: #cfcfcf;
+        }
+        nav {
+            margin: 20px 0;
+            text-align: center;
+        }
+        nav a {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background: #6c63ff;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s ease-in-out;
+        }
+        nav a:hover {
+            background: #4CAF50;
+        }
+        .content {
+            max-width: 800px;
+            margin: 40px auto;
+            text-align: center;
+            background: #fff;
+            color: #333;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .content h2 {
+            font-size: 28px;
+            color: #4CAF50;
+        }
+        .content p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #6c63ff, #4CAF50);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #4CAF50, #6c63ff);
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            border-radius: 8px;
+            display: none;
+        }
+        #result.success {
+            background-color: #e7f7e7;
+            color: #2d662d;
+            border: 1px solid #d4eed4;
+        }
+        #result.error {
+            background-color: #ffe6e6;
+            color: #a33a3a;
+            border: 1px solid #f5c6c6;
+        }
+        footer {
+            margin-top: 50px;
+            padding: 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+            color: #cfcfcf;
+            font-size: 14px;
+        }
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 28px;
+            }
+            nav a {
+                font-size: 14px;
+                padding: 8px 15px;
+            }
+            button {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Lead Prediction Tool</h1>
+        <p>Your Smart Solution for Classifying Leads into Hot and Cold Categories</p>
+    </header>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#prediction">Prediction</a>
+    </nav>
+
+    <section id="home" class="content">
+        <h2>Welcome to the Lead Prediction Tool</h2>
+        <p>
+            This project uses advanced machine learning algorithms to classify customer leads as "Hot" or "Cold" 
+            based on their attributes. It streamlines your decision-making processes and ensures efficient allocation of resources 
+            by focusing on the leads with the highest potential to convert.
+        </p>
+        <p>Navigate to the Prediction section below to get started.</p>
+    </section>
+
+    <section id="prediction" class="content">
+        <h2>Lead Prediction Form</h2>
+        <form id="predictForm">
+            <div class="form-group">
+                <label for="CUSTOMERNAME">Customer Name:</label>
+                <input type="text" id="CUSTOMERNAME" name="CUSTOMERNAME" required>
+            </div>
+            <div class="form-group">
+                <label for="PHONE">Phone:</label>
+                <input type="text" id="PHONE" name="PHONE" required>
+            </div>
+            <div class="form-group">
+                <label for="CITY">City:</label>
+                <input type="text" id="CITY" name="CITY" required>
+            </div>
+            <div class="form-group">
+                <label for="STATE">State:</label>
+                <input type="text" id="STATE" name="STATE" required>
+            </div>
+            <div class="form-group">
+                <label for="LEADSOURCE">Lead Source:</label>
+                <input type="text" id="LEADSOURCE" name="LEADSOURCE" required>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+
+        <div id="result"></div>
+    </section>
+
+    <footer>
+        &copy; 2024 Lead Prediction Tool - Designed for MarCom Solutions
+    </footer>
+
+    <script>
+        document.getElementById('predictForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value || null;
+            });
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'success';
+                resultDiv.innerHTML = `Prediction: ${data.prediction}`;
+            })
+            .catch(error => {
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = 'Error making prediction';
+            });
+        });
+    </script>
+
+</body>
+</html>
+-->
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Prediction Tool | MarCom Solutions</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #4CAF50, #6c63ff);
+            color: white;
+        }
+        header {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        header .logo {
+            width: 120px;
+            margin: 0 auto;
+        }
+        header h1 {
+            margin: 10px 0 5px;
+            font-size: 36px;
+            color: #ffffff;
+        }
+        header p {
+            font-size: 18px;
+            color: #cfcfcf;
+        }
+        nav {
+            margin: 20px 0;
+            text-align: center;
+        }
+        nav a {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background: #6c63ff;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s ease-in-out;
+        }
+        nav a:hover {
+            background: #4CAF50;
+        }
+        .hero {
+            text-align: center;
+            padding: 50px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin: 20px auto;
+            max-width: 900px;
+        }
+        .hero h2 {
+            font-size: 32px;
+            color: #4CAF50;
+        }
+        .hero p {
+            font-size: 20px;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+        .content {
+            max-width: 800px;
+            margin: 40px auto;
+            text-align: center;
+            background: #fff;
+            color: #333;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .content h2 {
+            font-size: 28px;
+            color: #4CAF50;
+        }
+        .content p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #6c63ff, #4CAF50);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #4CAF50, #6c63ff);
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            border-radius: 8px;
+            display: none;
+        }
+        #result.success {
+            background-color: #e7f7e7;
+            color: #2d662d;
+            border: 1px solid #d4eed4;
+        }
+        #result.error {
+            background-color: #ffe6e6;
+            color: #a33a3a;
+            border: 1px solid #f5c6c6;
+        }
+        footer {
+            margin-top: 50px;
+            padding: 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+            color: #cfcfcf;
+            font-size: 14px;
+        }
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 28px;
+            }
+            nav a {
+                font-size: 14px;
+                padding: 8px 15px;
+            }
+            button {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="https://via.placeholder.com/120" alt="MarCom Solutions Logo" class="logo">
+        <h1>Lead Prediction Tool</h1>
+        <p>Your Smart Solution for Classifying Leads into Hot and Cold Categories</p>
+    </header>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#prediction">Prediction</a>
+        <a href="#about">About</a>
+    </nav>
+
+    <section id="home" class="hero">
+        <h2>Welcome to the Lead Prediction Tool</h2>
+        <p>
+            Leveraging cutting-edge machine learning technology, our tool helps you classify customer leads
+            as "Hot" or "Cold," optimizing your resources and improving conversion rates. Streamline your sales process with confidence.
+        </p>
+    </section>
+
+    <section id="prediction" class="content">
+        <h2>Lead Prediction Form</h2>
+        <form id="predictForm">
+            <div class="form-group">
+                <label for="CUSTOMERNAME">Customer Name:</label>
+                <input type="text" id="CUSTOMERNAME" name="CUSTOMERNAME" required>
+            </div>
+            <div class="form-group">
+                <label for="PHONE">Phone:</label>
+                <input type="text" id="PHONE" name="PHONE" required>
+            </div>
+            <div class="form-group">
+                <label for="CITY">City:</label>
+                <input type="text" id="CITY" name="CITY" required>
+            </div>
+            <div class="form-group">
+                <label for="STATE">State:</label>
+                <input type="text" id="STATE" name="STATE" required>
+            </div>
+            <div class="form-group">
+                <label for="LEADSOURCE">Lead Source:</label>
+                <input type="text" id="LEADSOURCE" name="LEADSOURCE" required>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+
+        <div id="result"></div>
+    </section>
+
+    <section id="about" class="content">
+        <h2>About MarCom Solutions</h2>
+        <p>
+            MarCom Solutions is a leader in sales technology and predictive analytics. We specialize in providing
+            businesses with intelligent tools to maximize their lead potential, improve decision-making, and boost sales.
+        </p>
+        <p>
+            Our mission is to empower companies with the technology they need to succeed in an ever-evolving market.
+        </p>
+    </section>
+
+    <footer>
+        &copy; 2024 MarCom Solutions - All Rights Reserved
+    </footer>
+
+    <script>
+        document.getElementById('predictForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value || null;
+            });
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'success';
+                resultDiv.innerHTML = `Prediction: ${data.prediction}`;
+            })
+            .catch(error => {
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = 'Error making prediction';
+            });
+        });
+    </script>
+
+</body>
+</html>
+-->
+
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Prediction Tool | MarCom Solutions</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #4CAF50, #6c63ff);
+            color: white;
+            scroll-behavior: smooth;
+        }
+        header {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        header .logo {
+            width: 120px;
+            margin: 0 auto;
+        }
+        header h1 {
+            margin: 10px 0 5px;
+            font-size: 36px;
+            color: #ffffff;
+        }
+        header p {
+            font-size: 18px;
+            color: #cfcfcf;
+        }
+        nav {
+            margin: 20px 0;
+            text-align: center;
+        }
+        nav a {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background: #6c63ff;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s ease-in-out;
+        }
+        nav a:hover {
+            background: #4CAF50;
+        }
+        .hero {
+            text-align: center;
+            padding: 50px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin: 20px auto;
+            max-width: 900px;
+        }
+        .hero h2 {
+            font-size: 32px;
+            color: #4CAF50;
+        }
+        .hero p {
+            font-size: 20px;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+        .content {
+            max-width: 800px;
+            margin: 40px auto;
+            text-align: center;
+            background: #fff;
+            color: #333;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .content h2 {
+            font-size: 28px;
+            color: #4CAF50;
+        }
+        .content p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #6c63ff, #4CAF50);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #4CAF50, #6c63ff);
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            border-radius: 8px;
+            display: none;
+        }
+        #result.success {
+            background-color: #e7f7e7;
+            color: #2d662d;
+            border: 1px solid #d4eed4;
+        }
+        #result.error {
+            background-color: #ffe6e6;
+            color: #a33a3a;
+            border: 1px solid #f5c6c6;
+        }
+        footer {
+            margin-top: 50px;
+            padding: 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+            color: #cfcfcf;
+            font-size: 14px;
+        }
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 28px;
+            }
+            nav a {
+                font-size: 14px;
+                padding: 8px 15px;
+            }
+            button {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="https://via.placeholder.com/120" alt="MarCom Solutions Logo" class="logo">
+        <h1>Lead Prediction Tool</h1>
+        <p>Your Smart Solution for Classifying Leads into Hot and Cold Categories</p>
+    </header>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#prediction">Prediction</a>
+        <a href="#about">About</a>
+    </nav>
+
+    <section id="home" class="hero">
+        <h2>Welcome to the Lead Prediction Tool</h2>
+        <p>
+            Leveraging cutting-edge machine learning technology, our tool helps you classify customer leads
+            as "Hot" or "Cold," optimizing your resources and improving conversion rates. Streamline your sales process with confidence.
+        </p>
+        <p>Explore the tool's features and discover how it can revolutionize your sales approach!</p>
+    </section>
+
+    <section id="prediction" class="content">
+        <h2>Lead Prediction Form</h2>
+        <form id="predictForm">
+            <div class="form-group">
+                <label for="CUSTOMERNAME">Customer Name:</label>
+                <input type="text" id="CUSTOMERNAME" name="CUSTOMERNAME" required>
+            </div>
+            <div class="form-group">
+                <label for="PHONE">Phone:</label>
+                <input type="text" id="PHONE" name="PHONE" required>
+            </div>
+            <div class="form-group">
+                <label for="CITY">City:</label>
+                <input type="text" id="CITY" name="CITY" required>
+            </div>
+            <div class="form-group">
+                <label for="STATE">State:</label>
+                <input type="text" id="STATE" name="STATE" required>
+            </div>
+            <div class="form-group">
+                <label for="LEADSOURCE">Lead Source:</label>
+                <input type="text" id="LEADSOURCE" name="LEADSOURCE" required>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+
+        <div id="result"></div>
+    </section>
+
+    <section id="about" class="content">
+        <h2>About MarCom Solutions</h2>
+        <p>
+            MarCom Solutions is a leader in sales technology and predictive analytics. We specialize in providing
+            businesses with intelligent tools to maximize their lead potential, improve decision-making, and boost sales.
+        </p>
+        <p>
+            With years of expertise in machine learning and data-driven insights, our solutions ensure you stay ahead in the competitive market.
+        </p>
+        <p>
+            Our mission is to empower companies with technology that drives results and fosters growth. Join our journey to transform sales processes worldwide.
+        </p>
+    </section>
+
+    <footer>
+        &copy; 2024 MarCom Solutions - All Rights Reserved
+    </footer>
+
+    <script>
+        document.getElementById('predictForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value || null;
+            });
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'success';
+                resultDiv.innerHTML = `Prediction: ${data.prediction}`;
+            })
+            .catch(error => {
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = 'Error making prediction';
+            });
+        });
+    </script>
+
+</body>
+</html>
